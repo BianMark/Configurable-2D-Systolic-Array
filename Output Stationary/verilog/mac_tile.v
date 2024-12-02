@@ -20,6 +20,7 @@ output [bw-1:0] out_e;
 output [psum_bw-1:0] out_s;
 output IFIFO_loop; // high if psum finish 9 times accumulation, IFIFO need to loop the weight
 output [psum_bw-1:0] OS_out; // psum value to be read out to ofifo in Output Stationary mode
+output OS_out_valid; // valid signal for OFIFO in OS mode
 
 wire [psum_bw-1:0] mac_out;
 reg [bw-1:0] b_q; // buffer for west to east
@@ -37,7 +38,7 @@ reg [3:0] tile1_ic_counter;
 reg choose_tile;
 reg tile0_out_valid;  // High if tile0 finished 8 input channels accumulation
 reg tile1_out_valid;  // High if tile1 finished 8 input channels accumulation
-wire OS_out_valid = tile0_out_valid | tile1_out_valid;
+assign OS_out_valid = tile0_out_valid | tile1_out_valid;
 
 assign out_s = WeightOrOutput ? b_q : mac_out;
 assign out_e = a_q;

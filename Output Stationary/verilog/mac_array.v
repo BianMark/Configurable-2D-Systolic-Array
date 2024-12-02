@@ -1,6 +1,6 @@
 // Created by prof. Mingu Kang @VVIP Lab in UCSD ECE department
 // Please do not spread this code without permission 
-module mac_array (clk, reset, out_s, in_w, in_n, inst_w, WeightOrOutput, valid, OS_out, OS_out_valid, IFIFO_loop);
+module mac_array (clk, reset, out_s, in_w, in_n, inst_w, WeightOrOutput, valid, OS_out, IFIFO_loop);
 
 parameter bw = 4;
 parameter psum_bw = 16;
@@ -48,8 +48,8 @@ for (i=1; i < row+1 ; i=i+1) begin : row_num
     );
 end
 
-for (i=2, i<col+1, i=i+1) begin : row_num_OSvalid
-  assign OS_out_valid[col-1:0] = OS_out_valid_temp[col*i-1:col*(i-1)] ｜ OS_out_valid_temp[col*(i-1)-1:col*(i-2)];
+for (i=2; i<col+1; i=i+1) begin : row_num_OSvalid
+  assign OS_out_valid[col-1:0] = OS_out_valid_temp[col*i-1:col*(i-1)] | OS_out_valid_temp[col*(i-1)-1:col*(i-2)];
 end
 endgenerate
 
