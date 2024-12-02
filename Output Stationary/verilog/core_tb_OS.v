@@ -211,9 +211,9 @@ module core_tb_OS();
 
             A_xmem = 11'b10000000000;
 
-            for (t = 0; t<col; t = t+1) begin   // load into xmem
+            for (t = 0; t<len_kij; t = t+1) begin   // load into xmem
                 #0.5 clk        = 1'b0;
-                w_scan_file     = $fscanf(w_file,"%32b", D_xmem);
+                w_scan_file     = $fscanf(w_file,"%32b", D_xmem);   // read out 8*4bit weight once
                 WEN_xmem        = 0;
                 CEN_xmem        = 0;
                 if (t>0) A_xmem = A_xmem + 1;
@@ -362,37 +362,16 @@ module core_tb_OS();
                 /////////////////////////////////////
 
 
-
-                //////// OFIFO READ, read out the PE stored psum to OFIFO ////////
-                // Ideally, OFIFO should be read while execution, but we have enough ofifo
-                // depth so we can fetch out after execution.
-
-                // !!!! if we want to read out while execution, we need to make the PE recycle when accumaulate kij times and exchange data with OFIFO
-
-                #0.5 clk = 1'b0;
-                ofifo_rd = 1;
-                #0.5 clk = 1'b1;
-
-                for (t = 0; t<len_nij; t = t+1) begin   // Store to pmem
-                    #0.5 clk                   = 1'b0;
-                    WEN_pmem                   = 0;
-                    CEN_pmem                   = 0;
-                    if (t>0 | A_pmem>0) A_pmem = A_pmem + 1;
-                    #0.5 clk                   = 1'b1;
-                end
-
-                #0.5 clk = 1'b0;
-                ofifo_rd = 0;
-                WEN_pmem = 1;
-                CEN_pmem = 1;
-                #0.5 clk = 1'b1;
-                /////////////////////////////////////
-
             $display("ic = %d is completed", ic);
             end // end of input channel loop
             /////////////////////////////////////////////////
 
+        #0.5 clk = 1'b0; reset = 1;
+        #0.5 clk = 1'b1;
+        #0.5 clk = 1'b0; reset = 0;
+        #0.5 clk = 1'b1;
 
+    end
 
         //////// Accumulation has been done while Execution /////////
         #0.5 clk = 1'b0;
@@ -404,12 +383,14 @@ module core_tb_OS();
 
         $display("############ Verification Start during accumulation #############");
 
+
+
         for (i = 0; i<len_onij; i = i+1) begin
 
             #0.5 clk = 1'b0;
             #0.5 clk = 1'b1;
 
-            
+            ofifo_rd = 1;
             final_out     = sfp_out;
             out_scan_file = $fscanf(out_file,"%128b", answer);
             if (final_out == answer)
@@ -424,12 +405,8 @@ module core_tb_OS();
             
         end
 
-        #0.5 clk = 1'b0; reset = 1;
-        #0.5 clk = 1'b1;
-        #0.5 clk = 1'b0; reset = 0;
-        #0.5 clk = 1'b1;
+        ofifo_rd = 0;
 
-    end
 
 
     if (error == 0) begin

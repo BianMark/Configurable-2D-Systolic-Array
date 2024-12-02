@@ -57,8 +57,26 @@ module corelet (clk,
     wire [row*bw-1:0] l02Array_in_w;        // Data from L0 buffer to MAC array's in_w
     wire [col-1:0] Array2ofifo_valid;       // Valid signal from MAC array to OFIFO
     wire [col*bw-1:0] l02Array_in_n;                  // Weight Data from XMEM to ififo in_n
-    wire [col*bw-1:0] ififo2Array_in_n;               // Weight Data from ififo to MAC array
+    wire [col*bw-1:0] ififo2Array_in_n;               // Weight Data from ififo to MAC array, 4bit weight
+    wire [col*psum_bw-1:0] ififo2Array_in_n_padded;   // Weight Data from ififo to MAC array, 16bit weight
     wire [col*bw-1:0] Array_in_n;                     // north input data for MAC array
+    
+    // generate
+    // genvar i;
+    // for (i = 1; i < col+1; i = i + 1) begin : weight_padding_loop
+    //     assign ififo2Array_in_n_padded[i*psum_bw-1: psum_bw*(i-1)] = {12'b0, ififo2Array_in_n[i*bw-1:bw*(i-1)]};
+    // end
+    // endgenerate
+    assign ififo2Array_in_n_padded = {
+        {12'b0, ififo2Array_in_n[31:28]},
+        {12'b0, ififo2Array_in_n[27:24]},
+        {12'b0, ififo2Array_in_n[23:20]},
+        {12'b0, ififo2Array_in_n[19:16]},
+        {12'b0, ififo2Array_in_n[15:12]},
+        {12'b0, ififo2Array_in_n[11:8]},
+        {12'b0, ififo2Array_in_n[7:4]},
+        {12'b0, ififo2Array_in_n[3:0]}
+    };
     assign Array_in_n = WeightOrOutput ? ififo2Array_in_n : 0;
 
     wire [col-1:0] IFIFO_loop;                      // Valid signal from first row in Output Stationary mode
