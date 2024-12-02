@@ -1,6 +1,6 @@
 // Created by prof. Mingu Kang @VVIP Lab in UCSD ECE department
 // Please do not spread this code without permission
-module mac_tile (clk, out_s, in_w, out_e, in_n, inst_w, inst_e, reset, WeightOrOutput, OS_out, IFIFO_loop);
+module mac_tile (clk, out_s, in_w, out_e, in_n, inst_w, inst_e, reset, WeightOrOutput, OS_out, IFIFO_loop, OS_out_valid);
 
 parameter bw = 4;
 parameter psum_bw = 16;
@@ -37,6 +37,7 @@ reg [3:0] tile1_ic_counter;
 reg choose_tile;
 reg tile0_out_valid;  // High if tile0 finished 8 input channels accumulation
 reg tile1_out_valid;  // High if tile1 finished 8 input channels accumulation
+wire OS_out_valid = tile0_out_valid | tile1_out_valid;
 
 assign out_s = WeightOrOutput ? b_q : mac_out;
 assign out_e = a_q;
@@ -95,7 +96,10 @@ always @(posedge clk) begin
         end
         else if (tile1_ic_counter == 8) begin
           tile1_out_valid <= 1;
+        end
+        else begin
           tile0_out_valid <= 0;
+          tile1_out_valid <= 0;
         end
       end
 
@@ -106,12 +110,12 @@ always @(posedge clk) begin
       case(choose_tile)
         0: begin
           tile0_ic_counter <= tile0_ic_counter + 1;
-          OS_tile0 <= mac_out;
+          OS_tile0 <= mac_out > 0 ? mac_out : 0; // ReLU
           c_q <= OS_tile1;  // current choose_time is 0, so next execution will use the psum of tile1 to accumulate different input channels
         end
         1: begin
           tile1_ic_counter <= tile1_ic_counter + 1;
-          OS_tile1 <= mac_out;
+          OS_tile1 <= mac_out > 0 ? mac_out : 0; // ReLU
           c_q <= OS_tile0;
         end
       endcase

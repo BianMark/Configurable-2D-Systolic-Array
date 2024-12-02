@@ -1,6 +1,6 @@
 // Created by prof. Mingu Kang @VVIP Lab in UCSD ECE department
 // Please do not spread this code without permission
-module mac_row (clk, out_s, in_w, in_n, valid, inst_w, reset, WeightOrOutput, OS_out, IFIFO_loop);
+module mac_row (clk, out_s, in_w, in_n, valid, inst_w, reset, WeightOrOutput, OS_out, IFIFO_loop, OS_out_valid);
 
 parameter bw = 4;
 parameter psum_bw = 16;
@@ -16,7 +16,7 @@ output [psum_bw*col-1:0] out_s;
 output [col-1:0] valid;
 output [col-1:0] IFIFO_loop;
 output [psum_bw*col-1:0] OS_out;
-
+output [col-1:0] OS_out_valid;
 
 wire  [(col+1)*bw-1:0] temp;
 wire  [(col+1)*2-1:0]  temp_inst;
@@ -39,6 +39,7 @@ for (i=1; i < col+1 ; i=i+1) begin : col_num
     .out_s(out_s[psum_bw*i-1:psum_bw*(i-1)]),
     .WeightOrOutput(WeightOrOutput),
     .IFIFO_loop(IFIFO_loop[i-1]),
+    .OS_out_valid(OS_out_valid[i-1]),
     .OS_out(OS_out[psum_bw*i-1:psum_bw*(i-1)])
     );
   assign valid[i-1] = temp_inst[2*(i+1)-1];

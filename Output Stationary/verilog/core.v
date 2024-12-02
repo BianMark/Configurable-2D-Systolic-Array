@@ -55,7 +55,7 @@ module core (clk,
     .reset(reset),
     .ofifo_valid(l0_ofifo_valid[4]),
     .sfp_in(sfp_in),
-    .sfp_out(sfp_out),
+    .final_out(sfp_out),
     .inst(inst),
     .l0_in(sram2l0_in),
     .l0_o_full(l0_ofifo_valid[1]),
@@ -87,12 +87,5 @@ module core (clk,
     .WEN(inst[31]),
     .A(inst[30:20]));
 
-    // sram_32b_w2048 weight_sram(
-    // .CLK(clk),
-    // .D(D_xmem),
-    // .Q(sram2ififo_in),
-    // .CEN(inst[19]),
-    // .WEN(inst[18]),
-    // .A(inst[17:7]));
 
 endmodule

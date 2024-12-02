@@ -394,70 +394,39 @@ module core_tb_OS();
 
 
 
-        //////// Accumulation /////////
+        //////// Accumulation has been done while Execution /////////
         #0.5 clk = 1'b0;
         #0.5 clk = 1'b1;
 
         out_file = $fopen("out.txt", "r");   // need to modify file path
 
-        // Following three lines are to remove the first three comment lines of the file
-        // out_scan_file = $fscanf(out_file,"%s", answer);
-        // out_scan_file = $fscanf(out_file,"%s", answer);
-        // out_scan_file = $fscanf(out_file,"%s", answer);
-
         error = 0;
 
         $display("############ Verification Start during accumulation #############");
 
-        for (i = 0; i<len_onij+1; i = i+1) begin
+        for (i = 0; i<len_onij; i = i+1) begin
 
             #0.5 clk = 1'b0;
             #0.5 clk = 1'b1;
 
-            if (i>0) begin
-                final_out     = sfp_out;
-                out_scan_file = $fscanf(out_file,"%128b", answer);
-                if (final_out == answer)
-                    $display("%2d-th output featuremap Data matched! :D", i);
+            
+            final_out     = sfp_out;
+            out_scan_file = $fscanf(out_file,"%128b", answer);
+            if (final_out == answer)
+                $display("%2d-th output featuremap Data matched! :D", i);
 
-                else begin
-                    $display("%2d-th output featuremap Data ERROR!!", i);
-                    $display("final out: %128b", final_out);
-                    $display("answer: %128b", answer);
-                    error = 1;
-                end
+            else begin
+                $display("%2d-th output featuremap Data ERROR!!", i);
+                $display("final out: %128b", final_out);
+                $display("answer: %128b", answer);
+                error = 1;
             end
+            
         end
 
         #0.5 clk = 1'b0; reset = 1;
         #0.5 clk = 1'b1;
         #0.5 clk = 1'b0; reset = 0;
-        #0.5 clk = 1'b1;
-
-        for (j = 0; j<len_kij+1; j = j+1) begin
-
-            #0.5 clk = 1'b0;
-            if (j<len_kij) begin
-                CEN_pmem = 0;
-                WEN_pmem = 1;
-                //calculate the address of data that conv needs
-                A_pmem = (i / o_ni_dim) * a_pad_ni_dim + (i % o_ni_dim) + (j / ki_dim) * a_pad_ni_dim + (j % ki_dim) + (j * len_nij);
-            end
-
-            else  begin
-                CEN_pmem = 1;
-                WEN_pmem = 1;
-            end
-
-            if (j>0)  acc = 1;
-            #0.5 clk      = 1'b1;
-        end
-
-        #0.5 clk = 1'b0;
-        acc      = 0;
-        #0.5 clk = 1'b1;
-
-        #0.5 clk = 1'b0;
         #0.5 clk = 1'b1;
 
     end

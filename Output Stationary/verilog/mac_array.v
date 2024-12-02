@@ -1,6 +1,6 @@
 // Created by prof. Mingu Kang @VVIP Lab in UCSD ECE department
 // Please do not spread this code without permission 
-module mac_array (clk, reset, out_s, in_w, in_n, inst_w, WeightOrOutput, valid, OS_out, IFIFO_loop);
+module mac_array (clk, reset, out_s, in_w, in_n, inst_w, WeightOrOutput, valid, OS_out, OS_out_valid, IFIFO_loop);
 
 parameter bw = 4;
 parameter psum_bw = 16;
@@ -14,16 +14,18 @@ input  WeightOrOutput;
 input  [psum_bw*col-1:0] in_n;
 
 output [psum_bw*col-1:0] out_s;
-output [col-1:0] valid;
+output [col-1:0] valid; // valid signal for OFIFO in WS mode
 output [psum_bw*col-1:0] OS_out;
 output [col-1:0] IFIFO_loop;
 
+wire [col-1:0] OS_out_valid;  // valid signal for OFIFO in OS mode
 wire [row*col-1:0] valid_temp;
 wire [(row+1)*col*psum_bw-1:0] temp;
 wire [row*col-1:0] IFIFO_loop_temp;
+wire [row*col-1:0] OS_out_valid_temp;
 reg [row*2-1:0] inst_w_temp;
 
-assign valid = valid_temp[col*row-1:col*row-8]; // only the last row is pop out to OFIFO
+assign valid = WeightOrOutput? OS_out_valid : valid_temp[col*row-1:col*row-8];
 assign temp[psum_bw*col-1:0] = 0;
 assign out_s = temp[psum_bw*col*9-1:psum_bw*col*8];
 assign IFIFO_loop = IFIFO_loop_temp[col-1:0]; // only the first row is pop out to IFIFO as the loop signal
@@ -41,10 +43,17 @@ for (i=1; i < row+1 ; i=i+1) begin : row_num
     .reset(reset),
     .WeightOrOutput(WeightOrOutput),
     .IFIFO_loop(IFIFO_loop_temp[col*i-1:col*(i-1)]),
+    .OS_out_valid(OS_out_valid_temp[col*i-1:col*(i-1)]),
     .OS_out(OS_out[psum_bw*i-1:psum_bw*(i-1)])
     );
 end
+
+for (i=2, i<col+1, i=i+1) begin : row_num_OSvalid
+  assign OS_out_valid[col-1:0] = OS_out_valid_temp[col*i-1:col*(i-1)] ｜ OS_out_valid_temp[col*(i-1)-1:col*(i-2)];
+end
 endgenerate
+
+
 
 always @ (posedge clk) begin
     inst_w_temp[1:0] <= inst_w;

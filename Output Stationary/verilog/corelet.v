@@ -5,7 +5,7 @@ module corelet (clk,
                 reset,
                 ofifo_valid,
                 sfp_in,
-                sfp_out,
+                final_out,
                 inst,
                 l0_in,
                 l0_o_full,
@@ -42,7 +42,7 @@ module corelet (clk,
     output ofifo_o_ready;              // Ready signal from OFIFO
     output ofifo_valid;                // Valid signal indicating OFIFO has valid data
     output [col*psum_bw-1:0] ofifo_out;// Output data from OFIFO
-    output [psum_bw*col-1:0] sfp_out;  // Output data from SFP
+    output [psum_bw*col-1:0] final_out;  // Final Output data
     output ififo_o_full;               // Full signal from IFIFO
     output ififo_o_ready;              // Ready signal from IFIFO
     output ififo_valid;                // Valid signal indicating IFIFO has valid data
@@ -50,6 +50,8 @@ module corelet (clk,
     wire [psum_bw*col-1:0] Array2ofifo_out; // Data from MAC array to OFIFO
     wire [psum_bw*col-1:0] Array2ofifo_out_WS; // Data from MAC array to OFIFO in Weight Stationary mode
     wire [psum_bw*col-1:0] Array2ofifo_out_OS; // Data from MAC array to OFIFO in Output Stationary mode
+    wire [psum_bw*col-1:0] sfp_out;  // Output data from SFP
+    assign final_out = WeightOrOutput ? ofifo_out : sfp_out;
     assign Array2ofifo_out = WeightOrOutput ? Array2ofifo_out_OS : Array2ofifo_out_WS;
 
     wire [row*bw-1:0] l02Array_in_w;        // Data from L0 buffer to MAC array's in_w
@@ -97,7 +99,7 @@ module corelet (clk,
     .WeightOrOutput(WeightOrOutput),  // 0: weight stationary; 1: output stationsary
     .OS_out(Array2ofifo_out_OS),       // Output data for Output Stationary mode
     .IFIFO_loop(IFIFO_loop),       // Valid signal from first row in Output Stationary mode
-    .valid(Array2ofifo_valid)        // Valid signal for output data
+    .valid(Array2ofifo_valid)        // Valid signal for output data, WS -- last row of MAC array, OS -- 
     );
 
 
@@ -116,7 +118,6 @@ module corelet (clk,
     .o_full(ofifo_o_full),            // Full signal from OFIFO
     .o_ready(ofifo_o_ready),          // Ready signal from OFIFO
     .o_valid(ofifo_valid)            // Valid signal from OFIFO
-    //.WeightOrOutput(WeightOrOutput)
     );
 
 
@@ -134,7 +135,6 @@ module corelet (clk,
     .out(ififo2Array_in_n),                  // Output data from OFIFO
     .o_full(ififo_o_full),            // Full signal from IFIFO
     .o_ready(ififo_o_ready),          // Ready signal from IFIFO
-    //.WeightOrOutput(WeightOrOutput),
     .loop_flag(IFIFO_loop),
     .o_valid(ififo_valid)            // Valid signal from IFIFO
     );
