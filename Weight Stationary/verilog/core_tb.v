@@ -442,8 +442,8 @@ module core_tb();
                 $display("final out: %128b", final_out);
                 $display("answer: %128b", answer);
                 error = 1;
+                end
             end
-        end
         
         
         #0.5 clk = 1'b0; reset = 1;
@@ -477,7 +477,7 @@ module core_tb();
         #0.5 clk = 1'b0;
         #0.5 clk = 1'b1;
 
-    end
+        end
 
 
     if (error == 0) begin
