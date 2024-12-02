@@ -172,8 +172,8 @@ module core_tb_OS();
         rd_version = 1;
         WeightOrOutput = 1;
 
-        $dumpfile("core_tb.vcd");
-        $dumpvars(0,core_tb);
+        $dumpfile("core_tb_OS.vcd");
+        $dumpvars(0,core_tb_OS);
 
 
         //////// Reset /////////
