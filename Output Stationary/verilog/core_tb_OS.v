@@ -17,7 +17,7 @@ module core_tb_OS();
     parameter a_pad_ni_dim = 6; //input activations length root
     parameter o_ni_dim     = 4; //output activations length root
     parameter ki_dim       = 3; //Kernel loop iteration length root
-    parameter act_round = 2;  // Rounds of input activations per input channel = o_ni_dim*o_ni_dim / row
+    parameter act_tile = 2;  // tiles of input activations per input channel = o_ni_dim*o_ni_dim / row
 
     reg clk   = 0;
     reg reset = 1;
@@ -114,7 +114,7 @@ module core_tb_OS();
     // integer captured_data;        // Temporary variable for captured file data
 
     // Loop variables
-    integer t, i, j, kij, ic, round;      // Loop iterators
+    integer t, i, j, kij, ic, tile;      // Loop iterators
     integer error;                // Error counter for result verification
 
     assign inst_q[33]    = acc_q;        // Accumulation control signal
@@ -195,14 +195,14 @@ module core_tb_OS();
 
         for (ic = 0; ic<ic_dim; ic = ic+1) begin  // choose input weight data based on input channel loop
             case(ic)
-                0: w_file_name = "weight_itile0_otile0_ic0.txt";
-                1: w_file_name = "weight_itile0_otile0_ic1.txt";
-                2: w_file_name = "weight_itile0_otile0_ic2.txt";
-                3: w_file_name = "weight_itile0_otile0_ic3.txt";
-                4: w_file_name = "weight_itile0_otile0_ic4.txt";
-                5: w_file_name = "weight_itile0_otile0_ic5.txt";
-                6: w_file_name = "weight_itile0_otile0_ic6.txt";
-                7: w_file_name = "weight_itile0_otile0_ic7.txt";
+                0: w_file_name = "weight_inch_0.txt";
+                1: w_file_name = "weight_inch_1.txt";
+                2: w_file_name = "weight_inch_2.txt";
+                3: w_file_name = "weight_inch_3.txt";
+                4: w_file_name = "weight_inch_4.txt";
+                5: w_file_name = "weight_inch_5.txt";
+                6: w_file_name = "weight_inch_6.txt";
+                7: w_file_name = "weight_inch_7.txt";
             endcase
 
             w_file = $fopen(w_file_name, "r");
@@ -265,29 +265,29 @@ module core_tb_OS();
 
 
 
-            for (round = 0; round < act_round - 1; round = round + 1) begin
-                if (round == 0) begin
+            for (tile = 0; tile < act_tile - 1; tile = tile + 1) begin
+                if (tile == 0) begin
                     case(ic)
-                        0: x_file_name = "activation_tile0_ic0_round0.txt";
-                        1: x_file_name = "activation_tile0_ic1_round0.txt";
-                        2: x_file_name = "activation_tile0_ic2_round0.txt";
-                        3: x_file_name = "activation_tile0_ic3_round0.txt";
-                        4: x_file_name = "activation_tile0_ic4_round0.txt";
-                        5: x_file_name = "activation_tile0_ic5_round0.txt";
-                        6: x_file_name = "activation_tile0_ic6_round0.txt";
-                        7: x_file_name = "activation_tile0_ic7_round0.txt";
+                        0: x_file_name = "activation_ch0_tile0.txt";
+                        1: x_file_name = "activation_ch1_tile0.txt";
+                        2: x_file_name = "activation_ch2_tile0.txt";
+                        3: x_file_name = "activation_ch3_tile0.txt";
+                        4: x_file_name = "activation_ch4_tile0.txt";
+                        5: x_file_name = "activation_ch5_tile0.txt";
+                        6: x_file_name = "activation_ch6_tile0.txt";
+                        7: x_file_name = "activation_ch7_tile0.txt";
                     endcase
                 end
-                else begin  // round == 1
+                else begin  // tile == 1
                     case(ic)
-                        0: x_file_name = "activation_tile0_ic0_round1.txt";
-                        1: x_file_name = "activation_tile0_ic1_round1.txt";
-                        2: x_file_name = "activation_tile0_ic2_round1.txt";
-                        3: x_file_name = "activation_tile0_ic3_round1.txt";
-                        4: x_file_name = "activation_tile0_ic4_round1.txt";
-                        5: x_file_name = "activation_tile0_ic5_round1.txt";
-                        6: x_file_name = "activation_tile0_ic6_round1.txt";
-                        7: x_file_name = "activation_tile0_ic7_round1.txt";
+                        0: x_file_name = "activation_ch0_tile1.txt";
+                        1: x_file_name = "activation_ch1_tile1.txt";
+                        2: x_file_name = "activation_ch2_tile1.txt";
+                        3: x_file_name = "activation_ch3_tile1.txt";
+                        4: x_file_name = "activation_ch4_tile1.txt";
+                        5: x_file_name = "activation_ch5_tile1.txt";
+                        6: x_file_name = "activation_ch6_tile1.txt";
+                        7: x_file_name = "activation_ch7_tile1.txt";
                     endcase
                 end
                 x_file = $fopen(w_file_name, "r");
