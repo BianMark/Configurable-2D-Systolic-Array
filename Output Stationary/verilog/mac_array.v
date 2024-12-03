@@ -26,7 +26,7 @@ wire [row*col-1:0] OS_out_valid_temp;
 reg [row*2-1:0] inst_w_temp;
 
 assign valid = WeightOrOutput? OS_out_valid : valid_temp[col*row-1:col*row-8];
-assign temp[psum_bw*col-1:0] = 0;
+assign temp[psum_bw*col-1:0] = in_n;
 assign out_s = temp[psum_bw*col*9-1:psum_bw*col*8];
 assign IFIFO_loop = IFIFO_loop_temp[col-1:0]; // only the first row is pop out to IFIFO as the loop signal
 

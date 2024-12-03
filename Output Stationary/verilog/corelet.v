@@ -77,7 +77,7 @@ module corelet (clk,
         {12'b0, ififo2Array_in_n[7:4]},
         {12'b0, ififo2Array_in_n[3:0]}
     };
-    assign Array_in_n = WeightOrOutput ? ififo2Array_in_n : 0;
+    assign Array_in_n = WeightOrOutput ? ififo2Array_in_n_padded : 0;
 
     wire [col-1:0] IFIFO_loop;                      // Valid signal from first row in Output Stationary mode
 
