@@ -1,4 +1,4 @@
-// Created by 284 Little Group @UCSD
+ // Created by 284 Little Group @UCSD
 // Please do not spread this code without permission
 
 module corelet (clk,
@@ -59,7 +59,7 @@ module corelet (clk,
     wire [col*bw-1:0] l02Array_in_n;                  // Weight Data from XMEM to ififo in_n
     wire [col*bw-1:0] ififo2Array_in_n;               // Weight Data from ififo to MAC array, 4bit weight
     wire [col*psum_bw-1:0] ififo2Array_in_n_padded;   // Weight Data from ififo to MAC array, 16bit weight
-    wire [col*bw-1:0] Array_in_n;                     // north input data for MAC array
+    wire [col*psum_bw-1:0] Array_in_n;                     // north input data for MAC array
     
     // generate
     // genvar i;
@@ -67,15 +67,16 @@ module corelet (clk,
     //     assign ififo2Array_in_n_padded[i*psum_bw-1: psum_bw*(i-1)] = {12'b0, ififo2Array_in_n[i*bw-1:bw*(i-1)]};
     // end
     // endgenerate
-    assign ififo2Array_in_n_padded = {
-        {12'b0, ififo2Array_in_n[31:28]},
-        {12'b0, ififo2Array_in_n[27:24]},
-        {12'b0, ififo2Array_in_n[23:20]},
-        {12'b0, ififo2Array_in_n[19:16]},
-        {12'b0, ififo2Array_in_n[15:12]},
-        {12'b0, ififo2Array_in_n[11:8]},
-        {12'b0, ififo2Array_in_n[7:4]},
-        {12'b0, ififo2Array_in_n[3:0]}
+    assign ififo2Array_in_n_padded = 
+    {
+        12'b000000000000, ififo2Array_in_n[31:28],
+        12'b000000000000, ififo2Array_in_n[27:24],
+        12'b000000000000, ififo2Array_in_n[23:20],
+        12'b000000000000, ififo2Array_in_n[19:16],
+        12'b000000000000, ififo2Array_in_n[15:12],
+        12'b000000000000, ififo2Array_in_n[11:8],
+        12'b000000000000, ififo2Array_in_n[7:4],
+        12'b000000000000, ififo2Array_in_n[3:0]
     };
     assign Array_in_n = WeightOrOutput ? ififo2Array_in_n_padded : 0;
 
@@ -143,7 +144,7 @@ module corelet (clk,
     // Local buffer for the input weights.
     ififo #(
     .col(col),
-    .bw(psum_bw)
+    .bw(bw)
     ) ififo_instance (
     .clk(clk),
     .wr(inst[5]),                     // Write enable signal for ififo

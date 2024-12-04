@@ -18,6 +18,7 @@ module core_tb_OS();
     parameter o_ni_dim     = 4; //output activations length root
     parameter ki_dim       = 8; //Kernel loop iteration length root
     parameter act_tile = 2;  // tiles of input activations per input channel = o_ni_dim*o_ni_dim / row
+    parameter o_feature_num = 8; // number of output featuremaps
 
     reg clk   = 0;
     reg reset = 1;
@@ -193,177 +194,151 @@ module core_tb_OS();
         /////////////////////////
 
 
-        for (ic = 0; ic<ic_dim; ic = ic+1) begin  // choose input weight data based on input channel loop
-            case(ic)
-                0: w_file_name = "weight_inch_0.txt";
-                1: w_file_name = "weight_inch_1.txt";
-                2: w_file_name = "weight_inch_2.txt";
-                3: w_file_name = "weight_inch_3.txt";
 
-            endcase
+        w_file_name = "weight_os_3ic.txt";
 
-            w_file = $fopen(w_file_name, "r");
+        w_file = $fopen(w_file_name, "r");
 
-            /////// Weight data writing to high address XMEM ///////
+        /////// Weight data writing to high address XMEM ///////
 
-            A_xmem = 11'b10000000000;
+        A_xmem = 11'b10000000000;
 
-            for (t = 0; t<len_kij; t = t+1) begin   // load into xmem
-                #0.5 clk        = 1'b0;
-                w_scan_file     = $fscanf(w_file,"%32b", D_xmem);   // read out 8*4bit weight once
-                WEN_xmem        = 0;
-                CEN_xmem        = 0;
-                if (t>0) A_xmem = A_xmem + 1;
-                #0.5 clk        = 1'b1;
-            end
+        for (t = 0; t<len_kij*3; t = t+1) begin   // load into xmem
+            #0.5 clk        = 1'b0;
+            w_scan_file     = $fscanf(w_file,"%32b", D_xmem);   // read out 8*4bit weight once
+            WEN_xmem        = 0;
+            CEN_xmem        = 0;
+            if (t>0) A_xmem = A_xmem + 1;
+            #0.5 clk        = 1'b1;
+        end
 
+        #0.5 clk = 1'b0;
+        WEN_xmem = 1;
+        CEN_xmem = 1;
+        A_xmem   = 0;
+        #0.5 clk = 1'b1;
+        /////////////////////////////////////
+        for (i = 0; i<10 ; i = i+1) begin
             #0.5 clk = 1'b0;
-            WEN_xmem = 1;
-            CEN_xmem = 1;
-            A_xmem   = 0;
             #0.5 clk = 1'b1;
-            /////////////////////////////////////
-            for (i = 0; i<10 ; i = i+1) begin
-                #0.5 clk = 1'b0;
-                #0.5 clk = 1'b1;
-            end
+        end
 
-            /////// Weight data writing to ififo ///////
-            A_xmem = 11'b10000000000;
+        /////// Weight data writing to ififo ///////
+        A_xmem = 11'b10000000000;
 
+        #0.5 clk = 1'b0;
+        WEN_xmem = 1;
+        CEN_xmem = 0; // xmem read operation
+        #0.5 clk = 1'b1;
+
+
+        for (t = 0; t<len_kij*3; t = t+1) begin
+            #0.5 clk        = 1'b0;
+            ififo_wr           = 1;
+            A_xmem = A_xmem + 1;
+            #0.5 clk        = 1'b1;
+        end
+
+        #0.5 clk = 1'b0;
+        WEN_xmem = 1;
+        CEN_xmem = 1;
+        A_xmem   = 0;
+        #0.5 clk = 1'b1;
+        #0.5 clk = 1'b0;
+        ififo_wr    = 0;
+        #0.5 clk = 1'b1;
+
+        for (i = 0; ~IFIFO_o_full && i < 10; i = i+1) begin
             #0.5 clk = 1'b0;
-            WEN_xmem = 1;
-            CEN_xmem = 0; // xmem read operation
             #0.5 clk = 1'b1;
+        end
 
-            for (t = 0; t<len_kij; t = t+1) begin
-                #0.5 clk        = 1'b0;
-                ififo_wr           = 1;
-                if (t>0) A_xmem = A_xmem + 1;
-                #0.5 clk        = 1'b1;
-            end
-
-            #0.5 clk = 1'b0;
-            WEN_xmem = 1;
-            CEN_xmem = 1;
-            A_xmem   = 0;
-            #0.5 clk = 1'b1;
-            #0.5 clk = 1'b0;
-            ififo_wr    = 0;
-            #0.5 clk = 1'b1;
-
-            for (i = 0; ~IFIFO_o_full && i < 10; i = i+1) begin
-                #0.5 clk = 1'b0;
-                #0.5 clk = 1'b1;
-            end
-
-            /////////////////////////////////////
+        /////////////////////////////////////
 
 
 
 
-            // for (tile = 0; tile < act_tile - 1; tile = tile + 1) begin
-            //     if (tile == 0) begin
-            case(ic)
-                0: x_file_name = "activation_ch0_tile0.txt";
-                1: x_file_name = "activation_ch1_tile0.txt";
-                2: x_file_name = "activation_ch2_tile0.txt";
-                3: x_file_name = "activation_ch3_tile0.txt";
-                4: x_file_name = "activation_ch4_tile0.txt";
-                5: x_file_name = "activation_ch5_tile0.txt";
-                6: x_file_name = "activation_ch6_tile0.txt";
-                7: x_file_name = "activation_ch7_tile0.txt";
-            endcase
-                // end
-                // else begin  // tile == 1
-                //     case(ic)
-                //         0: x_file_name = "activation_ch0_tile1.txt";
-                //         1: x_file_name = "activation_ch1_tile1.txt";
-                //         2: x_file_name = "activation_ch2_tile1.txt";
-                //         3: x_file_name = "activation_ch3_tile1.txt";
-                //         4: x_file_name = "activation_ch4_tile1.txt";
-                //         5: x_file_name = "activation_ch5_tile1.txt";
-                //         6: x_file_name = "activation_ch6_tile1.txt";
-                //         7: x_file_name = "activation_ch7_tile1.txt";
-                //     endcase
-            // end
-            x_file = $fopen(w_file_name, "r");
+        /////// Activation data writing to low address XMEM ///////
+        x_file_name = "activation_os_3ic_tile0.txt";
+        x_file = $fopen(x_file_name, "r");
+        A_xmem = 0;
 
-            /////// Activation data writing to low address XMEM ///////
-            A_xmem = 0;
-            for (t = 0; t<len_kij; t = t+1) begin
-                #0.5 clk        = 1'b0;
-                x_scan_file     = $fscanf(x_file,"%32b", D_xmem);
-                WEN_xmem        = 0;
-                CEN_xmem        = 0;
-                if (t>0) A_xmem = A_xmem + 1;
-                #0.5 clk        = 1'b1;
-            end
+        for (t = 0; t<len_kij*3; t = t+1) begin
+            #0.5 clk        = 1'b0;
+            x_scan_file     = $fscanf(x_file,"%32b", D_xmem);
+            WEN_xmem        = 0;
+            CEN_xmem        = 0;
+            if (t>0) A_xmem = A_xmem + 1;
+            #0.5 clk        = 1'b1;
+        end
 
-            #0.5 clk = 1'b0;
-            WEN_xmem = 1;
-            CEN_xmem = 1;
-            A_xmem   = 0;
-            #0.5 clk = 1'b1;
-            $fclose(x_file);
-            /////////////////////////////////////////////////
-
-
-            /////// Activation data writing to L0 ///////
-            A_xmem   = 0;
-            #0.5 clk = 1'b0;
-            WEN_xmem = 1;
-            CEN_xmem = 0; // xmem read operation
-            #0.5 clk = 1'b1;
-
-            for (t = 0; t<len_kij; t = t+1) begin
-                #0.5 clk        = 1'b0;
-                l0_wr           = 1;
-                if (t>0) A_xmem = A_xmem + 1;
-                #0.5 clk        = 1'b1;
-            end
-
-            #0.5 clk = 1'b0;
-            WEN_xmem = 1;
-            CEN_xmem = 1;
-            A_xmem   = 0;
-            #0.5 clk = 1'b1;
-            #0.5 clk = 1'b0;
-            l0_wr    = 0;
-            #0.5 clk = 1'b1;
-
-            for (i = 0; i<10 ; i = i+1) begin   // provide some intermission
-                #0.5 clk = 1'b0;
-                #0.5 clk = 1'b1;
-            end
-            /////////////////////////////////////
-
-
-            /////// Execution, read data from L0 and IFIFO start to array at same time ///////
-            #0.5 clk = 1'b0;
-            l0_rd    = 1;
-            ififo_rd = 1;
-            #0.5 clk = 1'b1;
-
-            for (t = 0; t<len_kij+row+col; t = t+1) begin   // drain cycles to let the final computations complete
-                #0.5 clk = 1'b0;
-                execute  = 1;
-                #0.5 clk = 1'b1;
-            end
-
-            #0.5 clk = 1'b0;
-            l0_rd    = 0;
-            ififo_rd = 0;
-            execute  = 0;
-            #0.5 clk = 1'b1;            /////// !!!! need to reset the read pointer of IFIFO to the beginning
-            /////////////////////////////////////
-
-
-        $display("ic = %d is completed", ic);
-        end // end of input channel loop
+        #0.5 clk = 1'b0;
+        WEN_xmem = 1;
+        CEN_xmem = 1;
+        A_xmem   = 0;
+        #0.5 clk = 1'b1;
+        $fclose(x_file);
         /////////////////////////////////////////////////
 
-        #0.5 clk = 1'b0; reset = 1;
+
+        /////// Activation data writing to L0 ///////
+        A_xmem   = 0;
+        #0.5 clk = 1'b0;
+        WEN_xmem = 1;
+        CEN_xmem = 0; // xmem read operation
+        #0.5 clk = 1'b1;
+
+        for (t = 0; t<len_kij*3; t = t+1) begin
+            #0.5 clk        = 1'b0;
+            l0_wr           = 1;
+            A_xmem = A_xmem + 1;
+            #0.5 clk        = 1'b1;
+        end
+
+        #0.5 clk = 1'b0;
+        WEN_xmem = 1;
+        CEN_xmem = 1;
+        A_xmem   = 0;
+        #0.5 clk = 1'b1;
+        #0.5 clk = 1'b0;
+        l0_wr    = 0;
+        #0.5 clk = 1'b1;
+
+        for (i = 0; i<10 ; i = i+1) begin   // provide some intermission
+            #0.5 clk = 1'b0;
+            #0.5 clk = 1'b1;
+        end
+        /////////////////////////////////////
+
+
+        /////// Execution, read data from L0 and IFIFO start to array at same time ///////
+        #0.5 clk = 1'b0;
+        l0_rd    = 1;
+        ififo_rd = 1;
+        #0.5 clk = 1'b1;
+
+
+
+
+        for (t = 0; t<len_kij*3+row+col; t = t+1) begin   // drain cycles to let the final computations complete
+            
+            execute  = 1;
+            #0.5 clk = 1'b0;
+            #0.5 clk = 1'b1;
+        end
+
+        #0.5 clk = 1'b0;
+        l0_rd    = 0;
+        ififo_rd = 0;
+        execute  = 0;
+        #0.5 clk = 1'b1;            
+        /////////////////////////////////////
+
+
+
+        /////////////////////////////////////////////////
+
+        #0.5 clk = 1'b0; reset = 0;
         #0.5 clk = 1'b1;
         #0.5 clk = 1'b0; reset = 0;
         #0.5 clk = 1'b1;
@@ -382,7 +357,7 @@ module core_tb_OS();
 
 
 
-        for (i = 0; i<len_onij; i = i+1) begin
+        for (i = 0; i<o_feature_num; i = i+1) begin
 
             #0.5 clk = 1'b0;
             #0.5 clk = 1'b1;
@@ -406,21 +381,21 @@ module core_tb_OS();
 
 
 
-    if (error == 0) begin
-        $display("############ No error detected ##############");
-        $display("########### Project Completed !! ############");
+        if (error == 0) begin
+            $display("############ No error detected ##############");
+            $display("########### Project Completed !! ############");
 
-    end
+        end
 
-    // $fclose(acc_file);
-    //////////////////////////////////
+        // $fclose(acc_file);
+        //////////////////////////////////
 
-    for (t = 0; t<10; t = t+1) begin
-        #0.5 clk = 1'b0;
-        #0.5 clk = 1'b1;
-    end
+        for (t = 0; t<10; t = t+1) begin
+            #0.5 clk = 1'b0;
+            #0.5 clk = 1'b1;
+        end
 
-    #10 $finish;
+        #10 $finish;
 
     end // end of initial block
 

@@ -29,22 +29,22 @@ reg [psum_bw-1:0] c_q;
 reg [1:0] inst_q; // buffer for west to east instruction
 reg load_ready_q; // only active after reset, once receive new weight from west, become 0
 
-reg [3:0] acc_counter;  // counter for accumulation in Output Stationary, when it reaches 9, it will be reset to 0
+reg [4:0] acc_counter;  // counter for accumulation in Output Stationary
 reg IFIFO_loop_q;
 reg [psum_bw-1:0] OS_tile0; //store the psum of tile0
 reg [psum_bw-1:0] OS_tile1; //store the psum of tile1
-reg [3:0] tile0_ic_counter;
-reg [3:0] tile1_ic_counter;
+// reg [3:0] tile0_ic_counter;
+// reg [3:0] tile1_ic_counter;
 reg choose_tile;
-reg tile0_out_valid;  // High if tile0 finished 8 input channels accumulation
-reg tile1_out_valid;  // High if tile1 finished 8 input channels accumulation
+reg tile0_out_valid;  // High if tile0 finished 3 input channels accumulation
+reg tile1_out_valid;  // High if tile1 finished 3 input channels accumulation
 assign OS_out_valid = tile0_out_valid | tile1_out_valid;
 
-assign out_s = WeightOrOutput ? b_q : mac_out;
+assign out_s = WeightOrOutput ? {12'b000000000000,b_q} : mac_out;
 assign out_e = a_q;
 assign inst_e = inst_q;
 assign IFIFO_loop = IFIFO_loop_q;
-assign OS_out = (tile0_out_valid * OS_tile0) + (tile1_out_valid * OS_tile1);
+assign OS_out = OS_tile0 * tile0_out_valid;
 
 
 always @(posedge clk) begin
@@ -57,8 +57,8 @@ always @(posedge clk) begin
     c_q <= 0;
     acc_counter <= 0;
     choose_tile <= 0;
-    tile0_ic_counter <= 0;
-    tile1_ic_counter <= 0;
+    // tile0_ic_counter <= 0;
+    // tile1_ic_counter <= 0;
     tile0_out_valid <= 0;
     tile1_out_valid <= 0;
  end
@@ -88,65 +88,36 @@ always @(posedge clk) begin
       b_q <= in_n[3:0];  // pass the 4bit weight from north to south
       a_q <= in_w;  // pass the activation from west to east
 
-      if (acc_counter != acc_kij) begin  // execution stage
+      if ((acc_counter != 5'b11011) && (acc_counter != 5'b01001) && (acc_counter != 5'b10010)) begin  // execution stage)
         acc_counter <= acc_counter + 1; // increment the accumulation counter
         IFIFO_loop_q <= 0; // disable the output
         c_q <= mac_out;
-        if (tile0_ic_counter == input_ch) begin
-          tile0_out_valid <= 1;
-        end
-        else if (tile1_ic_counter == input_ch) begin
-          tile1_out_valid <= 1;
-        end
-        else begin
-          tile0_out_valid <= 0;
-          tile1_out_valid <= 0;
-        end
+        tile0_out_valid <= 0;
       end
 
-      // if (acc_counter == acc_kij) begin // 9 times accumulation finished
-      // acc_counter <= 0;
-      // IFIFO_loop_q <= 1; // enable the output
-      // choose_tile <= ~choose_tile; // switch the reg to store different tile's psum
-      // case(choose_tile)
-      //   0: begin
-      //     tile0_ic_counter <= tile0_ic_counter + 1;
-      //     OS_tile0 <= mac_out > 0 ? mac_out : 0; // ReLU
-      //     c_q <= OS_tile1;  // current choose_time is 0, so next execution will use the psum of tile1 to accumulate different input channels
-      //   end
-      //   1: begin
-      //     tile1_ic_counter <= tile1_ic_counter + 1;
-      //     OS_tile1 <= mac_out > 0 ? mac_out : 0; // ReLU
-      //     c_q <= OS_tile0;
-      //   end
-      // endcase
-      // end
+      else if ((acc_counter == 5'b01001) || (acc_counter == 5'b10010)) begin
+        acc_counter <= acc_counter + 1; // increment the accumulation counter
+        IFIFO_loop_q <= 0; // disable the output
+        tile0_out_valid <= 0;
+        c_q <= $signed(mac_out)>0 ? mac_out : 0;
+      end
+
+      else if (acc_counter == 5'b11011) begin
+        acc_counter <= 0;
+        OS_tile0 <= $signed(mac_out)>0 ? mac_out : 0;
+        tile0_out_valid <= 1;
+      end
+      
     end
   end
  endcase
 end
 
-always @ (negedge clk) begin
-  if (WeightOrOutput && (acc_counter == acc_kij)) begin // 9 times accumulation finished
-    acc_counter <= 0;
-    IFIFO_loop_q <= 1; // enable the output
-    choose_tile <= ~choose_tile; // switch the reg to store different tile's psum
-    case(choose_tile)
-      0: begin
-        tile0_ic_counter <= tile0_ic_counter + 1;
-        OS_tile0 <= mac_out > 0 ? mac_out : 0; // ReLU
-        c_q <= OS_tile1;  // current choose_time is 0, so next execution will use the psum of tile1 to accumulate different input channels
-      end
-      1: begin
-        tile1_ic_counter <= tile1_ic_counter + 1;
-        OS_tile1 <= mac_out > 0 ? mac_out : 0; // ReLU
-        c_q <= OS_tile0;
-      end
-    endcase
-  end
-end
+
+
 
 mac #(.bw(bw), .psum_bw(psum_bw)) mac_instance (
+    .WeightOrOutput(WeightOrOutput),
     .a(a_q),  // activation
     .b(b_q),  // weight
     .c(c_q),  // psum
