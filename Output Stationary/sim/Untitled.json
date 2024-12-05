@@ -1,16 +1,16 @@
 {
   "extensionVersion": "1.2.0",
   "fileName": "/Users/zhen/Downloads/Configurable-2D-Systolic-Array/Output Stationary/sim/core_tb_OS.vcd",
-  "markerTime": 89625,
-  "altMarkerTime": 91000,
+  "markerTime": null,
+  "altMarkerTime": null,
   "selectedSignal": {
-    "name": "core_tb_OS.core_instance.corelet_instance.l0_instance.rd",
+    "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[3].mac_row_instance.col_num[3].mac_tile_instance.mac_instance.out",
     "numberFormat": 16,
-    "msb": -1,
-    "lsb": -1
+    "msb": 15,
+    "lsb": 0
   },
-  "zoomRatio": 0.032,
-  "scrollLeft": 2788.5,
+  "zoomRatio": 0.128,
+  "scrollLeft": 24173.564000000002,
   "displayedSignals": [
     {
       "name": "core_tb_OS.core_instance.clk",
@@ -25,163 +25,49 @@
       "lsb": -1
     },
     {
-      "name": "core_tb_OS.sfp_out",
-      "numberFormat": 16,
-      "msb": 127,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.IFIFO_loop",
-      "numberFormat": 16,
-      "msb": 7,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.ififo_instance.out",
-      "numberFormat": 16,
-      "msb": 127,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.in_n",
-      "numberFormat": 16,
-      "msb": 127,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.l0_instance.out",
-      "numberFormat": 16,
-      "msb": 31,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.in_w",
-      "numberFormat": 16,
-      "msb": 31,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.l0_instance.rd",
-      "numberFormat": 16,
-      "msb": -1,
-      "lsb": -1
-    },
-    {
-      "name": "core_tb_OS.core_instance.input_sram.WEN",
-      "numberFormat": 16,
-      "msb": -1,
-      "lsb": -1
-    },
-    {
-      "name": "core_tb_OS.core_instance.input_sram.A",
-      "numberFormat": 2,
-      "msb": 10,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.input_sram.D",
-      "numberFormat": 2,
-      "msb": 31,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.input_sram.CEN",
-      "numberFormat": 16,
-      "msb": -1,
-      "lsb": -1
-    },
-    {
-      "name": "core_tb_OS.core_instance.input_sram.Q",
-      "numberFormat": 2,
-      "msb": 31,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.ififo_instance.in",
-      "numberFormat": 16,
-      "msb": 127,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.ififo_instance.wr",
-      "numberFormat": 16,
-      "msb": -1,
-      "lsb": -1
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.tile0_ic_counter",
-      "numberFormat": 16,
-      "msb": 3,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.tile0_out_valid",
-      "numberFormat": 16,
-      "msb": -1,
-      "lsb": -1
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.tile1_ic_counter",
-      "numberFormat": 16,
-      "msb": 3,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.tile1_out_valid",
-      "numberFormat": 16,
-      "msb": -1,
-      "lsb": -1
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.acc_counter",
-      "numberFormat": 16,
-      "msb": 3,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.OS_tile0",
-      "numberFormat": 16,
-      "msb": 15,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.OS_tile1",
-      "numberFormat": 16,
-      "msb": 15,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.OS_out",
-      "numberFormat": 16,
-      "msb": 15,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.in_n",
-      "numberFormat": 2,
-      "msb": 15,
-      "lsb": 0
-    },
-    {
       "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.mac_instance.b",
-      "numberFormat": 16,
-      "msb": 3,
-      "lsb": 0
-    },
-    {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.in_w",
       "numberFormat": 2,
       "msb": 3,
       "lsb": 0
     },
     {
       "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.mac_instance.a",
+      "numberFormat": 2,
+      "msb": 3,
+      "lsb": 0
+    },
+    {
+      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.mac_instance.c",
+      "numberFormat": 16,
+      "msb": 15,
+      "lsb": 0
+    },
+    {
+      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.mac_instance.out",
+      "numberFormat": 16,
+      "msb": 15,
+      "lsb": 0
+    },
+    {
+      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[3].mac_row_instance.col_num[3].mac_tile_instance.mac_instance.b",
+      "numberFormat": 2,
+      "msb": 3,
+      "lsb": 0
+    },
+    {
+      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[3].mac_row_instance.col_num[3].mac_tile_instance.mac_instance.a",
       "numberFormat": 16,
       "msb": 3,
       "lsb": 0
     },
     {
-      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[1].mac_row_instance.col_num[1].mac_tile_instance.mac_instance.out",
+      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[3].mac_row_instance.col_num[3].mac_tile_instance.mac_instance.c",
+      "numberFormat": 16,
+      "msb": 15,
+      "lsb": 0
+    },
+    {
+      "name": "core_tb_OS.core_instance.corelet_instance.mac_array_instance.row_num[3].mac_row_instance.col_num[3].mac_tile_instance.mac_instance.out",
       "numberFormat": 16,
       "msb": 15,
       "lsb": 0
