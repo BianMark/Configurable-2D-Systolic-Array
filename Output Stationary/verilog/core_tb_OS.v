@@ -354,8 +354,13 @@ module core_tb_OS();
         error = 0;
 
         $display("############ Verification Start during accumulation #############");
+        for (i = 0; i<2; i = i+1) begin
 
+            #0.5 clk = 1'b0;
+            #0.5 clk = 1'b1;
 
+            ofifo_rd = 1;
+        end
 
         for (i = 0; i<o_feature_num; i = i+1) begin
 
@@ -363,6 +368,7 @@ module core_tb_OS();
             #0.5 clk = 1'b1;
 
             ofifo_rd = 1;
+        
             final_out     = sfp_out;
             out_scan_file = $fscanf(out_file,"%128b", answer);
             if (final_out == answer)
@@ -370,7 +376,7 @@ module core_tb_OS();
 
             else begin
                 $display("%2d-th output featuremap Data ERROR!!", i);
-                $display("final out: %128b", final_out);
+                $display("output: %128b", final_out);
                 $display("answer: %128b", answer);
                 error = 1;
             end

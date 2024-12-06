@@ -88,19 +88,19 @@ always @(posedge clk) begin
       b_q <= in_n[3:0];  // pass the 4bit weight from north to south
       a_q <= in_w;  // pass the activation from west to east
 
-      if ((acc_counter != 5'b11011) && (acc_counter != 5'b01001) && (acc_counter != 5'b10010)) begin  // execution stage)
+      if ((acc_counter != 5'b11011)) begin  // execution stage)
         acc_counter <= acc_counter + 1; // increment the accumulation counter
         IFIFO_loop_q <= 0; // disable the output
         c_q <= mac_out;
         tile0_out_valid <= 0;
       end
 
-      else if ((acc_counter == 5'b01001) || (acc_counter == 5'b10010)) begin
-        acc_counter <= acc_counter + 1; // increment the accumulation counter
-        IFIFO_loop_q <= 0; // disable the output
-        tile0_out_valid <= 0;
-        c_q <= $signed(mac_out)>0 ? mac_out : 0;
-      end
+      // else if ((acc_counter == 5'b01001) || (acc_counter == 5'b10010)) begin
+      //   acc_counter <= acc_counter + 1; // increment the accumulation counter
+      //   IFIFO_loop_q <= 0; // disable the output
+      //   tile0_out_valid <= 0;
+      //   c_q <= $signed(mac_out)>0 ? mac_out : 0;
+      // end
 
       else if (acc_counter == 5'b11011) begin
         acc_counter <= 0;
