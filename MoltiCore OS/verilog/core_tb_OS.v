@@ -65,7 +65,9 @@ module core_tb_OS();
     reg ififo_rd_q = 0;           // Read enable signal for input FIFO (IFIFO)
     reg l0_rd_q    = 0;              // Read enable signal for L0 buffer
     reg l0_wr_q    = 0;              // Write enable signal for L0 buffer
-
+    reg l1_rd_q    = 0;              // Read enable signal for L1 buffer
+    reg l1_wr_q    = 0;              // Write enable signal for L1 buffer
+    reg ofifo2_rd_q = 0;           // Read enable signal for output FIFO (OFIFO)
     // Execution control signals
     reg execute_q = 0;            // Execution enable signal for the core
     reg load_q    = 0;               // Kernel loading enable signal
@@ -79,10 +81,13 @@ module core_tb_OS();
     reg [psum_bw*col-1:0] answer;
 
     reg ofifo_rd;
+    reg ofifo2_rd;
     reg ififo_wr;
     reg ififo_rd;
     reg l0_rd;
     reg l0_wr;
+    reg l1_rd;
+    reg l1_wr;
     reg execute;
     reg load;
     // reg [8*30:1] stringvar;
@@ -96,6 +101,7 @@ module core_tb_OS();
 
     wire ofifo_valid;
     wire [col*psum_bw-1:0] sfp_out;
+    wire [col*psum_bw-1:0] sfp_out2;
     wire [4:0] l0_ofifo_valid;      //4:ofifo o_valid; 3:ofifo o_ready; 2:ofifo o_full; 1:l0 o_full; 0:l0 o_ready;
     wire [2:0] ififo_valid;         //2:ififo o_valid; 1:ififo o_ready; 0:ififo o_full;
     wire OFIFO_o_valid; // High if all col_fifo is not empty, all col_fifo can be read out at same time
@@ -150,6 +156,10 @@ module core_tb_OS();
     .l0_ofifo_valid(l0_ofifo_valid),
     .D_xmem(D_xmem_q),
     .sfp_out(sfp_out),
+    .sfp_out2(sfp_out2),
+    .l1_rd(l1_rd),
+    .l1_wr(l1_wr),
+    .ofifo2_rd(ofifo2_rd),
     .reset(reset),
     .rd_version(rd_version_q),
     .ififo_valid(ififo_valid),
@@ -164,10 +174,13 @@ module core_tb_OS();
         WEN_xmem   = 1;
         A_xmem     = 0;
         ofifo_rd   = 0;
+        ofifo2_rd  = 0;
         ififo_wr   = 0;
         ififo_rd   = 0;
         l0_rd      = 0;
         l0_wr      = 0;
+        l1_rd      = 0;
+        l1_wr      = 0;
         execute    = 0;
         load       = 0;
         rd_version = 1;
@@ -258,7 +271,7 @@ module core_tb_OS();
 
 
 
-        /////// Activation data writing to low address XMEM ///////
+        /////// Activation tile0 data writing to low address XMEM ///////
         x_file_name = "activation_os_3ic_tile0.txt";
         x_file = $fopen(x_file_name, "r");
         A_xmem = 0;
@@ -281,7 +294,7 @@ module core_tb_OS();
         /////////////////////////////////////////////////
 
 
-        /////// Activation data writing to L0 ///////
+        /////// Activation tile0 data writing to L0 ///////
         A_xmem   = 0;
         #0.5 clk = 1'b0;
         WEN_xmem = 1;
@@ -311,9 +324,62 @@ module core_tb_OS();
         /////////////////////////////////////
 
 
-        /////// Execution, read data from L0 and IFIFO start to array at same time ///////
+        /////// Activation tile1 data writing to low address XMEM ///////
+        x_file_name = "activation_os_3ic_tile1.txt";
+        x_file = $fopen(x_file_name, "r");
+        A_xmem = 27;
+
+        for (t = 0; t<len_kij*3; t = t+1) begin
+            #0.5 clk        = 1'b0;
+            x_scan_file     = $fscanf(x_file,"%32b", D_xmem);
+            WEN_xmem        = 0;
+            CEN_xmem        = 0;
+            if (t>0) A_xmem = A_xmem + 1;
+            #0.5 clk        = 1'b1;
+        end
+
+        #0.5 clk = 1'b0;
+        WEN_xmem = 1;
+        CEN_xmem = 1;
+        A_xmem   = 0;
+        #0.5 clk = 1'b1;
+        $fclose(x_file);
+        /////////////////////////////////////////////////
+
+
+        /////// Activation tile1 data writing to L1 ///////
+        A_xmem   = 27;
+        #0.5 clk = 1'b0;
+        WEN_xmem = 1;
+        CEN_xmem = 0; // xmem read operation
+        #0.5 clk = 1'b1;
+
+        for (t = 0; t<len_kij*3; t = t+1) begin
+            #0.5 clk        = 1'b0;
+            l1_wr           = 1;
+            A_xmem = A_xmem + 1;
+            #0.5 clk        = 1'b1;
+        end
+
+        #0.5 clk = 1'b0;
+        WEN_xmem = 1;
+        CEN_xmem = 1;
+        A_xmem   = 0;
+        #0.5 clk = 1'b1;
+        #0.5 clk = 1'b0;
+        l1_wr    = 0;
+        #0.5 clk = 1'b1;
+
+        for (i = 0; i<10 ; i = i+1) begin   // provide some intermission
+            #0.5 clk = 1'b0;
+            #0.5 clk = 1'b1;
+        end
+        /////////////////////////////////////
+
+        /////// Execution, read data from L0 and L1, and IFIFO start to array at same time ///////
         #0.5 clk = 1'b0;
         l0_rd    = 1;
+        l1_rd    = 1;
         ififo_rd = 1;
         #0.5 clk = 1'b1;
 
@@ -329,6 +395,7 @@ module core_tb_OS();
 
         #0.5 clk = 1'b0;
         l0_rd    = 0;
+        l1_rd    = 0;
         ififo_rd = 0;
         execute  = 0;
         #0.5 clk = 1'b1;            
@@ -385,7 +452,35 @@ module core_tb_OS();
 
         ofifo_rd = 0;
 
+        for (i = 0; i<1; i = i+1) begin
 
+            #0.5 clk = 1'b0;
+            #0.5 clk = 1'b1;
+
+            ofifo2_rd = 1;
+        end
+
+        for (i = 0; i<o_feature_num; i = i+1) begin
+
+            #0.5 clk = 1'b0;
+            #0.5 clk = 1'b1;
+
+            ofifo2_rd = 1;
+        
+            final_out     = sfp_out2;
+            out_scan_file = $fscanf(out_file,"%128b", answer);
+            if (final_out == answer)
+                $display("%2d-th output featuremap Data matched! :D", i+8);
+
+            else begin
+                $display("%2d-th output featuremap Data ERROR!!", i+8);
+                $display("output: %128b", final_out);
+                $display("answer: %128b", answer);
+                error = 1;
+            end
+            
+        end
+        ofifo2_rd = 0;
 
         if (error == 0) begin
             $display("############ No error detected ##############");
@@ -415,11 +510,14 @@ module core_tb_OS();
         WEN_pmem_q   <= WEN_pmem;
         A_xmem_q     <= A_xmem;
         ofifo_rd_q   <= ofifo_rd;
+        ofifo2_rd_q  <= ofifo2_rd;
         acc_q        <= acc;
         ififo_wr_q   <= ififo_wr;
         ififo_rd_q   <= ififo_rd;
         l0_rd_q      <= l0_rd;
         l0_wr_q      <= l0_wr;
+        l1_rd_q      <= l1_rd;
+        l1_wr_q      <= l1_wr;
         execute_q    <= execute;
         load_q       <= load;
         rd_version_q <= rd_version;

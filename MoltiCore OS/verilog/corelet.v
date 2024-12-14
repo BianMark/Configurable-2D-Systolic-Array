@@ -17,7 +17,6 @@ module corelet (clk,
                 l1_o_ready,
                 ofifo_out,
                 ofifo2_rd,
-                ofifo_out2,
                 ofifo_o_full,
                 ofifo_o_ready,
                 ofifo_o_full2,
@@ -27,6 +26,8 @@ module corelet (clk,
                 ififo_o_ready,
                 ififo_valid,
                 rd_version,
+                l1_wr,
+                l1_rd,
                 WeightOrOutput);
 
     // Parameters for corelet configuration
@@ -46,6 +47,8 @@ module corelet (clk,
     input [psum_bw*col-1:0] sfp_in;    // Input data for the SFP module
     input [col*bw-1:0] ififo_in;       // Input weight data for the IFIFO module
     input WeightOrOutput;              // 0: weight stationary; 1: output stationsary
+    input l1_wr;                       // Write enable signal for L1 buffer
+    input l1_rd;                       // Read enable signal for L1 buffer
     // Outputs
     output l0_o_full;                  // Full signal from L0 buffer
     output l0_o_ready;                 // Ready signal from L0 buffer
@@ -58,7 +61,6 @@ module corelet (clk,
     output ofifo_o_ready2;              // Ready signal from OFIFO
     output ofifo_valid2;                // Valid signal indicating OFIFO has valid data
     output [col*psum_bw-1:0] ofifo_out;// Output data from OFIFO
-    output [col*psum_bw-1:0] ofifo_out2;// Output data from OFIFO
     output [psum_bw*col-1:0] final_out;  // Final Output data
     output [psum_bw*col-1:0] final_out2;  // Final Output data
     output ififo_o_full;               // Full signal from IFIFO
@@ -72,13 +74,16 @@ module corelet (clk,
     wire [psum_bw*col-1:0] Array2ofifo_out_WS_2; // Data from MAC array to OFIFO in Weight Stationary mode
     wire [psum_bw*col-1:0] Array2ofifo_out_OS_2; // Data from MAC array to OFIFO in Output Stationary mode
     wire [psum_bw*col-1:0] sfp_out;  // Output data from SFP
+    wire [col*psum_bw-1:0] ofifo_out2;// Output data from OFIFO
     assign final_out = WeightOrOutput ? ofifo_out : sfp_out;
     assign final_out2 = WeightOrOutput ? ofifo_out2 : sfp_out;
     assign Array2ofifo_out = WeightOrOutput ? Array2ofifo_out_OS_1 : Array2ofifo_out_WS_1;
     assign Array2ofifo_out2 = WeightOrOutput ? Array2ofifo_out_OS_2 : Array2ofifo_out_WS_2;
 
     wire [row*bw-1:0] l02Array_in_w;        // Data from L0 buffer to MAC array's in_w
+    wire [row*bw-1:0] l12Array_in_w;        // Data from L1 buffer to MAC array's in_w
     wire [col-1:0] Array2ofifo_valid;       // Valid signal from MAC array to OFIFO
+    wire [col-1:0] Array2ofifo_valid2;       // Valid signal from MAC array to OFIFO
     wire [col*bw-1:0] l02Array_in_n;                  // Weight Data from XMEM to ififo in_n
     wire [col*bw-1:0] ififo2Array_in_n;               // Weight Data from ififo to MAC array, 4bit weight
     wire [col*psum_bw-1:0] ififo2Array_in_n_padded;   // Weight Data from ififo to MAC array, 16bit weight
@@ -128,8 +133,8 @@ module corelet (clk,
     .bw(bw)
     ) l1_instance (
     .clk(clk),
-    .wr(inst[2]),             // Write enable for L0 buffer
-    .rd(inst[3]),             // Read enable for L0 buffer
+    .wr(l1_wr),             // Write enable for L0 buffer
+    .rd(l1_rd),             // Read enable for L0 buffer
     .reset(reset),            // Reset signal
     .in(l1_in),               // Input data to the L0 buffer
     .out(l12Array_in_w),      // Output data from L0 buffer to MAC array

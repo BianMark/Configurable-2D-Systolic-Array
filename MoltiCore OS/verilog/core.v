@@ -10,6 +10,9 @@ module core (clk,
              sfp_out,
              sfp_out2,
              WeightOrOutput,
+             l1_rd,
+             l1_wr,
+             ofifo2_rd,
              rd_version
              );
 
@@ -23,6 +26,9 @@ module core (clk,
     input [33:0] inst;
     input [31:0] D_xmem;
     input rd_version;
+    input l1_rd;
+    input l1_wr;
+    input ofifo2_rd;
     input WeightOrOutput;       // 0: weight stationary; 1: output stationsary
     output [4:0] l0_ofifo_valid; //4:ofifi o_valid; 3:ofifi o_ready; 2:ofifi o_full; 1:l0 o_full; 0:l0 o_ready;
     output [127:0] sfp_out;
@@ -62,6 +68,9 @@ module core (clk,
     .inst(inst),
     .l0_in(sram2l0_in),
     .l1_in(sram2l0_in),
+    .l1_rd(l1_rd),
+    .l1_wr(l1_wr),
+    .ofifo2_rd(ofifo2_rd),
     .l0_o_full(l0_ofifo_valid[1]),
     .l0_o_ready(l0_ofifo_valid[0]),
     .ofifo_out(ofifo2sram_out),
