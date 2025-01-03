@@ -1,5 +1,5 @@
-# 2D-Weight-Stationary-Systolic-Array
-This is the repository for the Final Project of ECE284 (UCSD FA24), which reliaizes a 8*8 Configurable 2D Systolic Array.
+# CNNs on Multi-Core 2D Systolic Array with Pruning and Huffman Coding
+This is the repository for the Final Project of ECE284 (UCSD FA24), which reliaizes a 8*8 Configurable 2D Systolic Array with Hardware Pruning and Huffman Coding.
 
 ## Input data format
 For **Output Stationary** mode, the input data format:
